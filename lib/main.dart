@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geo_scan/Models/checkpoint.dart';
+import 'package:geo_scan/View/qr_scanned_data.dart';
 import 'package:geo_scan/db/db_helper.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -158,6 +159,20 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                   icon: const Icon(Icons.qr_code)),
             ),
+
+            Expanded(
+              child: IconButton(
+                  onPressed: () {
+                    // Navigate to the QR Screen
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (builder) => const QRScannedData()));
+                  },
+                  icon: const Icon(Icons.list)),
+            ),
+
+
           ],
         )));
   }
@@ -168,7 +183,7 @@ class _MyHomePageState extends State<MyHomePage> {
       height: 10,
       decoration: BoxDecoration(
         color: Colors.grey[200], // Background color
-        borderRadius: BorderRadius.circular(25), // Circular border radius
+        borderRadius: BorderRadius.circular(5), // Circular border radius
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.5),
@@ -186,84 +201,6 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-
-  /*Widget locationList(BuildContext context) {
-    return Expanded(
-      child: Container(
-        height: MediaQuery.of(context).size.height * 0.5,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: _locationData.length,
-          itemBuilder: (BuildContext context, int index) {
-            Checkpoint location = _locationData[index];
-            final latitude = location.latitude;
-            final longitude = location.longitude;
-            return Container(
-              padding: const EdgeInsets.all(10.0),
-              margin:
-                  const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-              decoration: BoxDecoration(
-                color: GeoLocation().checkPointStatus(
-                        GeoLocation().calculateDistance(_latitude, _longitude,
-                            location.latitude, location.longitude),
-                        _thresholdDistance)
-                    ? Colors.green
-                    : Colors.red,
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(2.0),
-              ),
-              child: Row(children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Text(
-                          'Latitude:',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text('$latitude',
-                            style: const TextStyle(fontSize: 18.0)),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        const Text(
-                          'Longitude:',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text('$longitude',
-                            style: const TextStyle(fontSize: 18.0)),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Text(
-                          'Distance:',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                            '${GeoLocation().calculateDistance(_latitude, _longitude, location.latitude, location.longitude)} km',
-                            style: const TextStyle(fontSize: 18.0)),
-                      ],
-                    ),
-                  ],
-                ),
-              ]),
-            );
-          },
-        ),
-      ),
-    );
-  } */
 
   Widget locationList(BuildContext context) {
     return Expanded(

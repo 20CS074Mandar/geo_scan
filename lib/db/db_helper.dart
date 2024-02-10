@@ -24,6 +24,8 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
+    print("Initializing database and the path for it is " +
+        await getDatabasesPath());
     String path = join(await getDatabasesPath(), 'checkpoint_database.db');
     return await openDatabase(
       path,
@@ -63,7 +65,6 @@ class DatabaseHelper {
     return await db.insert('scandata', scanData.toMap());
   }
 
-
   // Get methods
   Future<List<Checkpoint>> getCheckpoints() async {
     Database db = await instance.database;
@@ -78,7 +79,7 @@ class DatabaseHelper {
     });
   }
 
-  Future<List<ScanData>>getScannedData() async {
+  Future<List<ScanData>> getScannedData() async {
     Database db = await instance.database;
     List<Map<String, dynamic>> maps = await db.query('scandata');
     return List.generate(maps.length, (index) {
@@ -89,6 +90,13 @@ class DatabaseHelper {
         data: maps[index]['data'],
       );
     });
+  }
+
+  Future<String> getCheckpointName(int id) async {
+    Database db = await instance.database;
+    List<Map<String, dynamic>> maps =
+        await db.query('checkpoints', where: 'id = ?', whereArgs: [id]);
+    return maps[0]['checkpoint_name'];
   }
 
 }
