@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geo_scan/Models/checkpoint.dart';
 import 'package:geo_scan/View/qr_scanned_data.dart';
+import 'package:geo_scan/View/splash_screen.dart';
 import 'package:geo_scan/db/db_helper.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -23,7 +24,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      //home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const SplashScreen(),
     );
   }
 }
@@ -55,11 +57,16 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _insertCheckpoints().then((value) {
-      getCheckpoints().then((value) {
-        setState(() {
-          _locationData.addAll(value);
-        });
+    // _insertCheckpoints().then((value) {
+    //   getCheckpoints().then((value) {
+    //     setState(() {
+    //       _locationData.addAll(value);
+    //     });
+    //   });
+    // });
+    getCheckpoints().then((value){
+      setState(() {
+        _locationData.addAll(value);
       });
     });
     checkLocationPermission().then((value) {
@@ -159,7 +166,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                   icon: const Icon(Icons.qr_code)),
             ),
-
             Expanded(
               child: IconButton(
                   onPressed: () {
@@ -171,8 +177,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                   icon: const Icon(Icons.list)),
             ),
-
-
           ],
         )));
   }
@@ -219,12 +223,12 @@ class _MyHomePageState extends State<MyHomePage> {
             return Container(
               padding: const EdgeInsets.all(10.0),
               margin:
-              const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                  const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
               decoration: BoxDecoration(
                 color: GeoLocation().checkPointStatus(
-                    GeoLocation().calculateDistance(
-                        _latitude, _longitude, location.latitude, location.longitude),
-                    _thresholdDistance)
+                        GeoLocation().calculateDistance(_latitude, _longitude,
+                            location.latitude, location.longitude),
+                        _thresholdDistance)
                     ? Colors.green
                     : Colors.red,
                 border: Border.all(color: Colors.grey),
@@ -273,7 +277,6 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-
 
   Future<bool> checkLocationPermission() async {
     bool serviceEnabled;

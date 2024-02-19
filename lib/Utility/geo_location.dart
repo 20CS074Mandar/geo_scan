@@ -1,16 +1,16 @@
 import 'package:geolocator/geolocator.dart';
 
 class GeoLocation {
-  Future<Position> _determineLocation() async {
+  Future<Position> determineLocation() async {
     return await Geolocator.getCurrentPosition();
   }
 
   Future<double> getLongitude() {
-    return _determineLocation().then((value) => value.longitude.toDouble());
+    return determineLocation().then((value) => value.longitude.toDouble());
   }
 
   Future<double> getLatitude() {
-    return _determineLocation().then((value) => value.latitude.toDouble());
+    return determineLocation().then((value) => value.latitude.toDouble());
   }
 
   double calculateDistance(double startLatitude, double startLongitude,
@@ -29,5 +29,19 @@ class GeoLocation {
       return false;
     }
     return true;
+  }
+
+  Future<bool> checkLocationService() {
+    return Geolocator.isLocationServiceEnabled();
+  }
+
+  Future<bool> checkPermission() {
+    return Geolocator.checkPermission().then((value) {
+      if (value == LocationPermission.always ||
+          value == LocationPermission.whileInUse) {
+        return true;
+      }
+      return false;
+    });
   }
 }
