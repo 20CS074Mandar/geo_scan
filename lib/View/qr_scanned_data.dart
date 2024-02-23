@@ -144,7 +144,7 @@ class _QRScannedDataState extends State<QRScannedData> {
 
   dataToCSV(List<Map<String, dynamic>> data) {
     String csv = '';
-    csv += 'Car Codes,Time Captured\n';
+    csv += 'Car Code,Time Captured\n';
     for (int i = 1; i < data.length; i++) {
       csv += '${data[i]['data']},${data[i]['timestamp']}\n';
     }

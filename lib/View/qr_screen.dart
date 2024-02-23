@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geo_scan/View/HomePage.dart';
 import 'package:geo_scan/View/qr_scanned_data.dart';
 import 'package:geo_scan/db/db_helper.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -40,34 +41,24 @@ class _QRScreenState extends State<QRScreen> {
         title: const Text('QR Scanner'),
       ),
       body: Center(
-        child: _scanned
-            ? Text(
-                'QR Code Value: $_qrCodeValue',
-                style: const TextStyle(fontSize: 20),
-              )
-            : FractionallySizedBox(
-                widthFactor: 0.8,
-                heightFactor: 0.4,
-                child: MobileScanner(
-                  onDetect: (capture) {
-                    if (!_scanned) {
-                      final List<Barcode> barcodes = capture.barcodes;
-                      for (final barcode in barcodes) {
-                        setState(() {
-                          _scanned = true;
-                          _qrCodeValue = barcode.rawValue!;
-                          _insertQRData(_checkpointId, _qrCodeValue);
-                        });
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => QRScannedData()));
-                        break; // Stop scanning after the first QR code is detected
-                      }
-                    }
-                  },
-                ),
-              ),
+        child: FractionallySizedBox(
+          widthFactor: 0.8,
+          heightFactor: 0.4,
+          child: MobileScanner(onDetect: (capture) {
+            final List<Barcode> barcodes = capture.barcodes;
+            if(_scanned) return;
+            for (final barcode in barcodes) {
+              setState(() {
+                _scanned = true;
+                _qrCodeValue = barcode.rawValue!;
+                _insertQRData(_checkpointId, _qrCodeValue);
+              });
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (context) => const HomePage()));
+              break; // Stop scanning after the first QR code is detected
+            }
+          }),
+        ),
       ),
     );
   }
