@@ -34,7 +34,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 2), () {
       getScannedData().then((value) {
         setState(() {
           _scanDataList = value;
@@ -52,7 +51,6 @@ class _HomePageState extends State<HomePage> {
           });
         });
       });
-    });
   }
 
   @override
@@ -228,7 +226,7 @@ class _HomePageState extends State<HomePage> {
   dataToCSV(List<Map<String, dynamic>> data) {
     String csv = '';
     csv += 'Car Code,Time Captured\n';
-    for (int i = 1; i < data.length; i++) {
+    for (int i =0 ; i < data.length; i++) {
       csv += '${data[i]['data']},${data[i]['timestamp']}\n';
     }
     return csv;
@@ -241,7 +239,7 @@ class _HomePageState extends State<HomePage> {
         await GetDeviceInformation().allInformationOfDevice();
     // String? deviceId = await GetDeviceInformation().getDeviceId();
     String deviceInfoString =
-        '${deviceInfo['company']}-${deviceInfo['device']}'.toLowerCase();
+        '${deviceInfo['company']}-${deviceInfo['id']}'.toLowerCase();
     String checkpointName = currentCheckpointName.toLowerCase();
     String fileString = '$checkpointName.$deviceInfoString';
     final file = await File('${tempDir.path}/$fileString.csv').create();

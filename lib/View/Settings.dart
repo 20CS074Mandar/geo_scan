@@ -76,8 +76,14 @@ class _SettingsState extends State<Settings> {
       ),
       body: Column(
         children: [
+          ElevatedButton(onPressed: (){
+          }, child: const Text("Backup All Data")),
         ],
       ),
     );
+  }
+
+  Future<void>backupCurrentData() async {
+    // Backup all data to cloud
   }
 }

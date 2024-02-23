@@ -31,7 +31,7 @@ class GetDeviceInformation {
       AndroidDeviceInfo androidDeviceInfo) {
     var deviceData = {
       "company": androidDeviceInfo.brand,
-      "model": androidDeviceInfo.model,
+      "id": androidDeviceInfo.id,
       "device": androidDeviceInfo.device,
       "deviceType": "A"
     };
