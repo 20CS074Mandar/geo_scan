@@ -7,7 +7,6 @@ import 'package:geo_scan/Models/checkpoint.dart';
 import 'package:geo_scan/Utility/geo_location.dart';
 import 'package:geo_scan/View/HomePage.dart';
 import 'package:geo_scan/db/db_helper.dart';
-import 'package:geo_scan/main.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -52,7 +51,8 @@ class _HealthCheckState extends State<HealthCheck> {
           _longitude = value.longitude;
           _insertCheckpointsToDb().whenComplete(() {
             getCurrentCheckpoint().then((value) {
-              saveCurrentCheckpointId(value.id,value.checkpoint_name).whenComplete(() {
+              saveCurrentCheckpointId(value.id, value.checkpoint_name)
+                  .whenComplete(() {
                 setState(() {
                   print("Value recived: ${value.checkpoint_name}  ");
                   currentCheckpoint = value;
@@ -250,7 +250,8 @@ class _HealthCheckState extends State<HealthCheck> {
     return noCheckpoint;
   }
 
-  Future<void> saveCurrentCheckpointId(int currentCheckpointId,String currentCheckpointName) async {
+  Future<void> saveCurrentCheckpointId(
+      int currentCheckpointId, String currentCheckpointName) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setInt("currentCheckpointId", currentCheckpointId);
     preferences.setString("currentCheckpointName", currentCheckpointName);

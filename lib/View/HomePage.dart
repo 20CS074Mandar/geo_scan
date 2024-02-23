@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:geo_scan/View/Settings.dart';
 import 'package:geo_scan/View/qr_scanned_data.dart';
 import 'package:geo_scan/View/qr_screen.dart';
 import 'package:geo_scan/db/db_helper.dart';
@@ -64,39 +65,16 @@ class _HomePageState extends State<HomePage> {
         ),
         backgroundColor: Colors.blue,
       ),
-      floatingActionButton: SpeedDial(
-        overlayColor: Colors.black,
-        overlayOpacity: 0.5,
-        icon: Icons.add,
-        activeIcon: Icons.close,
+      floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blue,
-        children: [
-          SpeedDialChild(
-            child: Icon(Icons.qr_code),
-            backgroundColor: Colors.blue,
-            label: 'Scan QR Code',
-            labelBackgroundColor: Colors.blue,
-            onTap: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (builder) => QRScreen()),
-              );
-            },
-          ),
-          SpeedDialChild(
-            child: Icon(Icons.file_download),
-            backgroundColor: Colors.blue,
-            label: 'Export to CSV',
-            labelBackgroundColor: Colors.blue,
-            onTap: () {
-              // Add your export to CSV logic here
-              getDataToShare().then((value) {
-                print(value);
-                shareCSVFile(dataToCSV(value), checkpointName);
-              });
-            },
-          ),
-        ],
+        child: const Icon(
+          Icons.qr_code_scanner,
+          color: Colors.white,
+        ),
+        onPressed: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (builder) => const QRScreen()));
+        },
       ),
       drawer: Drawer(
         child: ListView(
@@ -136,24 +114,22 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             ListTile(
-              title: const Text('QR Scanner'),
+              title: const Text('Export to CSV'),
               onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (builder) => const QRScreen()),
-                );
+                getDataToShare().then((value) {
+                  shareCSVFile(dataToCSV(value), checkpointName);
+                });
               },
             ),
-            /*ListTile(
-              title: const Text('Scanned Data'),
+            ListTile(
+              title: const Text('Settings'),
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (builder) => const QRScannedData()),
+                  MaterialPageRoute(builder: (builder) => const Settings()),
                 );
               },
-            ),*/
+            ),
           ],
         ),
       ),
@@ -236,7 +212,6 @@ class _HomePageState extends State<HomePage> {
   Future<List<Map<String, dynamic>>> getDataToShare() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int? checkpointId = prefs.getInt('currentCheckpointId');
-    String checkpointName = prefs.getString('currentCheckpointName') ?? 'None';
     List<ScanData> scanData = await dbHelper.getScannedData();
     List<Map<String, dynamic>> data = [];
     for (int i = 0; i < scanData.length; i++) {
@@ -266,9 +241,9 @@ class _HomePageState extends State<HomePage> {
         await GetDeviceInformation().allInformationOfDevice();
     // String? deviceId = await GetDeviceInformation().getDeviceId();
     String deviceInfoString =
-        '${deviceInfo['company']}-${deviceInfo['device']}';
-    String checkpointName = currentCheckpointName;
-    String fileString = '$deviceInfoString-$checkpointName';
+        '${deviceInfo['company']}-${deviceInfo['device']}'.toLowerCase();
+    String checkpointName = currentCheckpointName.toLowerCase();
+    String fileString = '$checkpointName.$deviceInfoString';
     final file = await File('${tempDir.path}/$fileString.csv').create();
     await file.writeAsString(csvData);
     Share.shareFiles([(file.path)], text: 'CSV Data');

@@ -57,14 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    // _insertCheckpoints().then((value) {
-    //   getCheckpoints().then((value) {
-    //     setState(() {
-    //       _locationData.addAll(value);
-    //     });
-    //   });
-    // });
-    getCheckpoints().then((value){
+    getCheckpoints().then((value) {
       setState(() {
         _locationData.addAll(value);
       });
@@ -302,41 +295,6 @@ class _MyHomePageState extends State<MyHomePage> {
           'Location permissions are permanently denied, we cannot request permissions');
     }
     return locationStatus;
-  }
-
-  //TODO: For production remove the increment logic
-  Future<void> _insertCheckpoints() async {
-    /*Shantigram : 23.17000, 72.5294
-Gota : 23.1013, 72.5407
-BhuyangDev : 23.0603 72.5385
-Infopercept: 23.0328, 72.5568*/
-    List<Checkpoint> _checkpointDump = [
-      Checkpoint(
-          checkpoint_name: 'Shantigram',
-          latitude: 23.17000,
-          longitude: 72.5294),
-      Checkpoint(
-          checkpoint_name: 'Gota', latitude: 23.1013, longitude: 72.5294),
-      Checkpoint(
-          checkpoint_name: 'BhuyangDev', latitude: 23.0603, longitude: 72.5385),
-      Checkpoint(
-          checkpoint_name: 'Infopercept', latitude: 23.0328, longitude: 72.5568)
-    ];
-    for (int i = 0; i < _checkpointDump.length; i++) {
-      // Check if the checkpoint already exists in the database
-      Checkpoint checkpoint = _checkpointDump[i];
-      List<Checkpoint> existingCheckpoints =
-          await databaseHelper.getCheckpoints();
-      bool checkpointExists = existingCheckpoints.any((existingCheckpoint) =>
-          existingCheckpoint.checkpoint_name == checkpoint.checkpoint_name &&
-          existingCheckpoint.latitude == checkpoint.latitude &&
-          existingCheckpoint.longitude == checkpoint.longitude);
-      // If the checkpoint doesn't exist, insert it into the database
-      if (!checkpointExists) {
-        print("Inserting checkpoint: $checkpoint");
-        await databaseHelper.insertCheckpoint(checkpoint);
-      }
-    }
   }
 
   Future<List<Checkpoint>> getCheckpoints() async {
