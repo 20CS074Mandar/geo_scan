@@ -104,4 +104,10 @@ class DatabaseHelper {
     Database db = await instance.database;
     await db.delete('scandata');
   }
+
+  Future<int>totalUniqueScannedData() async {
+    Database db = await instance.database;
+    List<Map<String, dynamic>> maps = await db.rawQuery('SELECT COUNT(DISTINCT data) FROM scandata');
+    return maps[0]['COUNT(DISTINCT data)'];
+  }
 }

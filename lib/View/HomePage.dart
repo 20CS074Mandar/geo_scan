@@ -28,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   String currentCheckpointId = "";
   DatabaseHelper dbHelper = DatabaseHelper();
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
+  int _totalUniqueScans = 0;
 
   @override
   void initState() {
@@ -36,6 +37,11 @@ class _HomePageState extends State<HomePage> {
       getScannedData().then((value) {
         setState(() {
           _scanDataList = value;
+        });
+        getTotalUniqueScans().then((value) {
+          setState(() {
+            _totalUniqueScans = value;
+          });
         });
         getCurrentCheckpoint().then((value) {
           setState(() {
@@ -138,7 +144,7 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             ),
-            ListTile(
+            /*ListTile(
               title: const Text('Scanned Data'),
               onTap: () {
                 Navigator.push(
@@ -147,7 +153,7 @@ class _HomePageState extends State<HomePage> {
                       builder: (builder) => const QRScannedData()),
                 );
               },
-            ),
+            ),*/
           ],
         ),
       ),
@@ -163,22 +169,45 @@ class _HomePageState extends State<HomePage> {
               alignment: Alignment.topCenter,
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
-                child: DataTable(
-                  // Datatable widget that have the property columns and rows.
-                  columns: const [
-                    DataColumn(
-                      label: Text('Car Code'),
+                child: Column(
+                  children: [
+                    const SizedBox(
+                      height: 20,
                     ),
-                    DataColumn(
-                      label: Text('Time Captured'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Total Cars : ",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 20),
+                        ),
+                        Text(_totalUniqueScans.toString(),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20)),
+                      ],
                     ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    DataTable(
+                      // Datatable widget that have the property columns and rows.
+                      columns: const [
+                        DataColumn(
+                          label: Text('Car Code'),
+                        ),
+                        DataColumn(
+                          label: Text('Time Captured'),
+                        ),
+                      ],
+                      rows: _scanDataList.map((scanData) {
+                        return DataRow(cells: [
+                          DataCell(Text(scanData.data)),
+                          DataCell(Text(scanData.timestamp)),
+                        ]);
+                      }).toList(),
+                    )
                   ],
-                  rows: _scanDataList.map((scanData) {
-                    return DataRow(cells: [
-                      DataCell(Text(scanData.data)),
-                      DataCell(Text(scanData.timestamp)),
-                    ]);
-                  }).toList(),
                 ),
               ),
             ),
@@ -193,6 +222,11 @@ class _HomePageState extends State<HomePage> {
     result.add(id.toString());
     result.add(checkpointName);
     return result;
+  }
+
+  Future<int> getTotalUniqueScans() async {
+    int totalUniqueScans = await dbHelper.totalUniqueScannedData();
+    return totalUniqueScans;
   }
 
   Future<List<ScanData>> getScannedData() async {

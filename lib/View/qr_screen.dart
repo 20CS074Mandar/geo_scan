@@ -17,7 +17,7 @@ class QRScreen extends StatefulWidget {
 class _QRScreenState extends State<QRScreen> {
   bool _scanned = false;
   String _qrCodeValue = '';
-  DatabaseHelper _dbHelper = DatabaseHelper();
+  final DatabaseHelper _dbHelper = DatabaseHelper();
   int _checkpointId = 0;
 
   @override
