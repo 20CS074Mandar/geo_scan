@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geo_scan/View/HealthCheck.dart';
 import 'package:lottie/lottie.dart';
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -17,7 +18,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _navigateToNextScreen() async {
     // Simulate waiting for the animation to complete
-    await Future.delayed(const Duration(seconds: 5)); // Adjust the duration as needed
+    await Future.delayed(
+        const Duration(seconds: 3)); // Adjust the duration as needed
 
     // Navigate to the next screen
     Navigator.of(context).pushReplacement(

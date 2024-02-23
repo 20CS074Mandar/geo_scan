@@ -1,12 +1,16 @@
+import 'dart:developer';
+
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geo_scan/Models/checkpoint.dart';
 import 'package:geo_scan/Utility/geo_location.dart';
+import 'package:geo_scan/View/HomePage.dart';
 import 'package:geo_scan/db/db_helper.dart';
 import 'package:geo_scan/main.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'import_location_csv.dart';
 
@@ -47,14 +51,20 @@ class _HealthCheckState extends State<HealthCheck> {
           _latitude = value.latitude;
           _longitude = value.longitude;
           _insertCheckpointsToDb().whenComplete(() {
-            // Navigator.push(context, MaterialPageRoute(builder: (context)=>MyHomePage(title: "Demo")));
             getCurrentCheckpoint().then((value) {
-              setState(() {
-                print("Value recived: ${value.checkpoint_name}  ");
-                currentCheckpoint = value;
-                print(
-                    "Current Checkpoint: ${currentCheckpoint.checkpoint_name}");
-                _checkpointLoading = false;
+              saveCurrentCheckpointId(value.id,value.checkpoint_name).whenComplete(() {
+                setState(() {
+                  print("Value recived: ${value.checkpoint_name}  ");
+                  currentCheckpoint = value;
+                  print(
+                      "Current Checkpoint: ${currentCheckpoint.checkpoint_name}");
+                  _checkpointLoading = false;
+                  Future.delayed(const Duration(seconds: 1), () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => HomePage()),
+                    );
+                  });
+                });
               });
             });
           });
@@ -97,7 +107,9 @@ class _HealthCheckState extends State<HealthCheck> {
             ),
             const SizedBox(height: 20),
             Text(
-                "Current Checkpoint: ${currentCheckpoint.checkpoint_name ?? "None"}",style: const TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+              "Current Checkpoint: ${currentCheckpoint.checkpoint_name ?? "None"}",
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
           ],
         ),
       ),
@@ -236,5 +248,14 @@ class _HealthCheckState extends State<HealthCheck> {
       }
     }
     return noCheckpoint;
+  }
+
+  Future<void> saveCurrentCheckpointId(int currentCheckpointId,String currentCheckpointName) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setInt("currentCheckpointId", currentCheckpointId);
+    preferences.setString("currentCheckpointName", currentCheckpointName);
+    print("Saved Current Checkpoint Id");
+    log("Saved Current Checkpoint Id to Shared Preferences",
+        name: "HealthCheck", time: DateTime.now());
   }
 }

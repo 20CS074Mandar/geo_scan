@@ -99,4 +99,9 @@ class DatabaseHelper {
     return maps[0]['checkpoint_name'];
   }
 
+  // Delete All Scanned Data
+  Future<void> deleteAllScannedData() async {
+    Database db = await instance.database;
+    await db.delete('scandata');
+  }
 }

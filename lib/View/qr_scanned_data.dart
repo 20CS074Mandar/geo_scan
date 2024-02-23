@@ -1,6 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:geo_scan/Models/checkpoint.dart';
+import 'package:geo_scan/Utility/device_info.dart';
 import 'package:geo_scan/db/db_helper.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Models/scandata.dart';
 
@@ -14,6 +20,8 @@ class QRScannedData extends StatefulWidget {
 class _QRScannedDataState extends State<QRScannedData> {
   List<ScanData> _scanDataList = [];
   DatabaseHelper _dbHelper = DatabaseHelper();
+  String _currentCheckpointName = '';
+  String _currentCheckpointId = '';
 
   @override
   void initState() {
@@ -21,6 +29,12 @@ class _QRScannedDataState extends State<QRScannedData> {
     getScannedData().then((value) {
       setState(() {
         _scanDataList = value;
+      });
+      getCurrentCheckpointData().then((value) {
+        setState(() {
+          _currentCheckpointName = value[0]['checkpoint_name'];
+          _currentCheckpointId = value[0]['id'].toString();
+        });
       });
     });
   }
@@ -34,12 +48,21 @@ class _QRScannedDataState extends State<QRScannedData> {
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'Scanned Data',
+            Text(
+              '$_currentCheckpointId $_currentCheckpointName Scanned Data.',
               style: TextStyle(fontSize: 20),
             ),
             const SizedBox(height: 20),
             _scannerDataList(context),
+            ElevatedButton(
+              onPressed: () {
+                getDataToShare().then((value) {
+                  print(value);
+                  shareCSVFile(dataToCSV(value), _currentCheckpointName);
+                });
+              },
+              child: const Text('Share Scanned Data'),
+            ),
           ],
         ));
   }
@@ -71,26 +94,13 @@ class _QRScannedDataState extends State<QRScannedData> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Timestamp: ${_scanDataList[index].timestamp}'),
+                            Text(
+                                'Timestamp: ${_scanDataList[index].timestamp}'),
                             Text(
                                 'Checkpoint : ${_scanDataList[index].checkpoint_id}'),
                           ],
                         ),
                       ),
-                    ),
-                    Expanded(child:
-                    IconButton(
-                      icon: const Icon(Icons.share),
-                      onPressed: () {
-                        // Share scanned data
-                        final String text = 'Scanned Data: ${_scanDataList[index].data}\n'
-                            'Timestamp: ${_scanDataList[index].timestamp}\n'
-                            'Checkpoint : ${_scanDataList[index].checkpoint_id}';
-
-                        Share.share(text, subject: 'Scanned Data');
-                        // Share scanned data
-                      },
-                    ),
                     ),
                   ],
                 ),
@@ -102,7 +112,57 @@ class _QRScannedDataState extends State<QRScannedData> {
     );
   }
 
+  Future<List<Map<String, dynamic>>> getCurrentCheckpointData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int? checkpointId = prefs.getInt('currentCheckpointId');
+    String checkpointName = prefs.getString('currentCheckpointName') ?? 'None';
+    return [
+      {'id': checkpointId, 'checkpoint_name': checkpointName}
+    ];
+  }
+
   Future<List<ScanData>> getScannedData() async {
     return await _dbHelper.getScannedData();
+  }
+
+  Future<List<Map<String, dynamic>>> getDataToShare() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int? checkpointId = prefs.getInt('currentCheckpointId');
+    String checkpointName = prefs.getString('currentCheckpointName') ?? 'None';
+    List<ScanData> scanData = await _dbHelper.getScannedData();
+    List<Map<String, dynamic>> data = [];
+    for (int i = 0; i < scanData.length; i++) {
+      data.add({
+        'checkpointId': scanData[i].checkpoint_id,
+        'checkpointName': await _dbHelper.getCheckpointName(checkpointId!),
+        'data': scanData[i].data,
+        'timestamp': scanData[i].timestamp
+      });
+    }
+    return data;
+  }
+
+  dataToCSV(List<Map<String, dynamic>> data) {
+    String csv = '';
+    csv += 'Car Codes,Time Captured\n';
+    for (int i = 1; i < data.length; i++) {
+      csv += '${data[i]['data']},${data[i]['timestamp']}\n';
+    }
+    return csv;
+  }
+
+  Future<void> shareCSVFile(
+      String csvData, String currentCheckpointName) async {
+    final tempDir = await getTemporaryDirectory();
+    Map<String, dynamic> deviceInfo =
+        await GetDeviceInformation().allInformationOfDevice();
+    // String? deviceId = await GetDeviceInformation().getDeviceId();
+    String deviceInfoString =
+        '${deviceInfo['company']}-${deviceInfo['device']}';
+    String checkpointName = currentCheckpointName;
+    String fileString = '$deviceInfoString-$checkpointName';
+    final file = await File('${tempDir.path}/$fileString.csv').create();
+    await file.writeAsString(csvData);
+    Share.shareFiles([(file.path)], text: 'CSV Data');
   }
 }
