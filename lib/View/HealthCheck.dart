@@ -11,8 +11,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'import_location_csv.dart';
-
 class HealthCheck extends StatefulWidget {
   const HealthCheck({super.key});
 
@@ -25,7 +23,7 @@ class _HealthCheckState extends State<HealthCheck> {
   bool _locationServiceLoading = true;
   double _latitude = 0.0;
   double _longitude = 0.0;
-  double threshold = 3.0;
+  double threshold = 0.9;
   bool _checkpointLoading = true;
   Checkpoint noCheckpoint = Checkpoint(
     checkpoint_name: "None",
@@ -107,7 +105,7 @@ class _HealthCheckState extends State<HealthCheck> {
             ),
             const SizedBox(height: 20),
             Text(
-              "Current Checkpoint: ${currentCheckpoint.checkpoint_name ?? "None"}",
+              "Current Checkpoint: ${currentCheckpoint.checkpoint_name}",
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ],

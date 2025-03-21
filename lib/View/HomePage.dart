@@ -1,13 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:geo_scan/View/Settings.dart';
-import 'package:geo_scan/View/qr_scanned_data.dart';
 import 'package:geo_scan/View/qr_screen.dart';
 import 'package:geo_scan/db/db_helper.dart';
 import 'package:lottie/lottie.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
