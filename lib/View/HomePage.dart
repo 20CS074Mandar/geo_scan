@@ -244,6 +244,6 @@ class _HomePageState extends State<HomePage> {
     String fileString = '$checkpointName.$deviceInfoString';
     final file = await File('${tempDir.path}/$fileString.csv').create();
     await file.writeAsString(csvData);
-    Share.shareFiles([(file.path)], text: 'CSV Data');
+    Share.shareXFiles([XFile(file.path)], text: 'CSV Data');
   }
 }
