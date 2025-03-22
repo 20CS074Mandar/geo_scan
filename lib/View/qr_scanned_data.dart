@@ -163,6 +163,6 @@ class _QRScannedDataState extends State<QRScannedData> {
     String fileString = '$deviceInfoString-$checkpointName';
     final file = await File('${tempDir.path}/$fileString.csv').create();
     await file.writeAsString(csvData);
-    Share.shareFiles([(file.path)], text: 'CSV Data');
+    Share.shareXFiles([XFile(file.path)], text: 'CSV Data');
   }
 }

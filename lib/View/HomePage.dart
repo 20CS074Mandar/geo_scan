@@ -1,13 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:geo_scan/View/LocationDetectionMethod.dart';
 import 'package:geo_scan/View/Settings.dart';
-import 'package:geo_scan/View/qr_scanned_data.dart';
 import 'package:geo_scan/View/qr_screen.dart';
 import 'package:geo_scan/db/db_helper.dart';
 import 'package:lottie/lottie.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,23 +32,23 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-      getScannedData().then((value) {
+    getScannedData().then((value) {
+      setState(() {
+        _scanDataList = value;
+      });
+      getTotalUniqueScans().then((value) {
         setState(() {
-          _scanDataList = value;
-        });
-        getTotalUniqueScans().then((value) {
-          setState(() {
-            _totalUniqueScans = value;
-          });
-        });
-        getCurrentCheckpoint().then((value) {
-          setState(() {
-            currentCheckpointId = value[0];
-            checkpointName = value[1];
-            _loader = false;
-          });
+          _totalUniqueScans = value;
         });
       });
+      getCurrentCheckpoint().then((value) {
+        setState(() {
+          currentCheckpointId = value[0];
+          checkpointName = value[1];
+          _loader = false;
+        });
+      });
+    });
   }
 
   @override
@@ -128,6 +126,13 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             ),
+            ListTile(
+              title: const Text('Change Location'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer first
+                showExportDataDialog(); // Show export dialog
+              },
+            )
           ],
         ),
       ),
@@ -188,6 +193,54 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void showExportDataDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Export Data'),
+          content: const Text(
+            'Do you want to export your current scan data to CSV before changing location? '
+            'Unsaved data may be difficult to recover later.',
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Export Now'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                getDataToShare().then((value) {
+                  shareCSVFile(dataToCSV(value), checkpointName).then((_) {
+                    // Navigate to location detection after export completes
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (builder) => const LocationDetectionMethod(),
+                      ),
+                    );
+                  });
+                });
+              },
+            ),
+            TextButton(
+              child: const Text('Continue Without Export'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Navigate to location detection without exporting
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (builder) => const LocationDetectionMethod(),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<List> getCurrentCheckpoint() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     int id = preferences.getInt("currentCheckpointId") ?? 0;
@@ -226,7 +279,7 @@ class _HomePageState extends State<HomePage> {
   dataToCSV(List<Map<String, dynamic>> data) {
     String csv = '';
     csv += 'Car Code,Time Captured\n';
-    for (int i =0 ; i < data.length; i++) {
+    for (int i = 0; i < data.length; i++) {
       csv += '${data[i]['data']},${data[i]['timestamp']}\n';
     }
     return csv;
@@ -244,6 +297,6 @@ class _HomePageState extends State<HomePage> {
     String fileString = '$checkpointName.$deviceInfoString';
     final file = await File('${tempDir.path}/$fileString.csv').create();
     await file.writeAsString(csvData);
-    Share.shareFiles([(file.path)], text: 'CSV Data');
+    Share.shareXFiles([XFile(file.path)], text: 'CSV Data');
   }
 }
