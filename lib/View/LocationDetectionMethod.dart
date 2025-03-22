@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:geo_scan/View/HealthCheck.dart';
 import 'package:geo_scan/View/HomePage.dart';
+import 'package:geo_scan/View/SelectLocation.dart';
+import 'package:geo_scan/View/qr_screen_location_registration.dart';
 import 'package:lottie/lottie.dart';
 
 class LocationDetectionMethod extends StatefulWidget {
@@ -41,7 +43,8 @@ class _LocationDetectionMethodState extends State<LocationDetectionMethod> {
             const SizedBox(height: 40),
             _buildOptionCard(
               title: 'Auto Location Detection',
-              description: 'Uses your device GPS to automatically detect your location',
+              description:
+                  'Uses your device GPS to automatically detect your location',
               icon: Icons.location_on,
               value: SingingCharacter.AutoLocationDetection,
               lottieAsset: 'assets/animations/location.json',
@@ -62,7 +65,9 @@ class _LocationDetectionMethodState extends State<LocationDetectionMethod> {
                     MaterialPageRoute(builder: (context) => HealthCheck()),
                   );
                 } else {
-                  Navigator.pushNamed(context, '/QRScreen');
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => SelectLocation()),
+                  );
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -98,7 +103,9 @@ class _LocationDetectionMethodState extends State<LocationDetectionMethod> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: _character == value ? Theme.of(context).primaryColor : Colors.transparent,
+          color: _character == value
+              ? Theme.of(context).primaryColor
+              : Colors.transparent,
           width: 2,
         ),
       ),

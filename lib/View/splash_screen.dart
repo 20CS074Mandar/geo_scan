@@ -1,4 +1,7 @@
+import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:geo_scan/Models/checkpoint.dart';
 import 'package:geo_scan/View/HealthCheck.dart';
 import 'package:geo_scan/View/HomePage.dart';
 import 'package:geo_scan/View/LocationDetectionMethod.dart';
@@ -19,7 +22,9 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     // Add any initialization logic here
-    _navigateToNextScreen();
+    _insertCheckpointsToDb().whenComplete(() {
+      _navigateToNextScreen();
+    });
   }
 
   Future<void> _navigateToNextScreen() async {
@@ -48,11 +53,43 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<bool> isCheckPointPresentInCache() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    int id = preferences.getInt("currentCheckpointId") ?? 0;
-    String checkpointName = await dbHelper.getCheckpointName(id);
-    if (checkpointName.isNotEmpty) {
+    int id = preferences.getInt("currentCheckpointId") ?? -1;
+    if (id != -1) {
       return true;
     }
     return false;
+  }
+
+  Future<void> _insertCheckpointsToDb() async {
+    List<Checkpoint> checkpoints = await _getCheckpointsFromCSV();
+    for (int i = 0; i < checkpoints.length; i++) {
+      // Check if the checkpoint already exists in the database
+      Checkpoint checkpoint = checkpoints[i];
+      List<Checkpoint> existingCheckpoints = await dbHelper.getCheckpoints();
+      bool checkpointExists = existingCheckpoints.any((existingCheckpoint) =>
+          existingCheckpoint.checkpoint_name == checkpoint.checkpoint_name &&
+          existingCheckpoint.latitude == checkpoint.latitude &&
+          existingCheckpoint.longitude == checkpoint.longitude);
+      // If the checkpoint doesn't exist, insert it into the database
+      if (!checkpointExists) {
+        print("Inserting checkpoint: $checkpoint");
+        await dbHelper.insertCheckpoint(checkpoint);
+      }
+    }
+  }
+
+  Future<List<Checkpoint>> _getCheckpointsFromCSV() async {
+    List<Checkpoint> checkpoints = [];
+    final myData = await rootBundle.loadString('assets/csv/checkpoints.csv');
+    List<List<dynamic>> csvTable = const CsvToListConverter().convert(myData);
+    for (int i = 1; i < csvTable.length; i++) {
+      Checkpoint checkpoint = Checkpoint(
+        checkpoint_name: csvTable[i][0],
+        longitude: double.parse(csvTable[i][1].toString()),
+        latitude: double.parse(csvTable[i][2].toString()),
+      );
+      checkpoints.add(checkpoint);
+    }
+    return checkpoints;
   }
 }
